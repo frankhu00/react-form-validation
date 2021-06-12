@@ -1,0 +1,13 @@
+{
+    "presets": ["@babel/env", "@babel/preset-typescript", "@babel/react"],
+    "plugins": ["@babel/plugin-syntax-object-rest-spread"],
+    "env": {
+        "production-esm": {
+            "presets": [
+                ["@babel/env", { "modules": false }],
+                "@babel/preset-typescript",
+                "@babel/react"
+            ]
+        }
+    }
+}
