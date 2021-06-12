@@ -1,10 +1,10 @@
 {
     "name": "@frankhu00/react-form-validation",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Form and input validation for react",
     "main": "dist/umd/index.js",
     "module": "dist/esm/index.js",
-    "types": "dist/types/types.d.ts",
+    "types": "dist/types/index.d.ts",
     "source": "src/index.ts",
     "files": [
         "dist/",
