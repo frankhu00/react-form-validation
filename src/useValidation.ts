@@ -36,8 +36,21 @@ const defaultInitialValidity: ValidationState = {
  *
  * @param inputValue Value of the input component
  * @param rules Validation rules that applies
- * @param config ValidationConfig
- * @returns UseValidationResponse
+ * @param config ValidationConfig:
+ * - **inputName?**: string - Name associated with the input component. This is passed as the 3rd argument in onValidity handlers
+ * - **validateOnMount?**: boolean - Immediately call the validation fn on mount when true
+ * - **onValidityFailure?**: ValidationEventListener - Handler called when validation failed
+ * - **onValiditySuccess?**: ValidationEventListener - Handler called when validation passed
+ * - **onValidityChanged?**: ValidationEventListener - Handler called when validation state switches
+ * - **ValidationEventListener** is defined as `(state: ValidationState, value: any, name?: string) => void`
+ *
+ * @returns UseValidationResponse:
+ * - **validity**: ValidationState - State of the validation result. Defined as `{ passed: boolean, messages: string[] }`
+ * - **validate**: ValidateFn - Fn to directly trigger validation logic. Defined as `(inputValue: any, updateState?: boolean) => any`.
+ *
+ * ***Note***: When `updateState` argument in `validate` fn is `true`, nothing will be returned from the call and will directly update the internal state
+ * that tracks the validation state. If `false`, the internal state will NOT be updated, but will return the validation state from the call.
+ * This is useful when you want to do the validation check manually before performing another action.
  */
 export const useValidation: (
     inputValue: any,
@@ -74,6 +87,10 @@ export const useValidation: (
             return [state, prev[0]];
         });
 
+    // This is for manual trigger, which may not want to update state and just test if the newest value will pass validation
+    const validate: ValidateFn = (value, updateState = true) =>
+        updateState ? updateValidationState(value) : executeValidators(value, rules);
+
     useEffect(() => {
         if (isOnMount.current && !!validateOnMount) {
             updateValidationState(inputValue);
@@ -91,6 +108,6 @@ export const useValidation: (
 
     return {
         validity: validity[0],
-        validate: updateValidationState,
+        validate,
     };
 };

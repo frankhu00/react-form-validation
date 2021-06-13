@@ -44,7 +44,7 @@ export interface ValidationState {
 }
 
 //For manually running the validate fn inside the useValidation hook
-export type ValidateFn = (value: any) => void;
+export type ValidateFn = (value: any, updateState?: boolean) => any;
 
 export interface UseValidationResponse {
     validity: ValidationState;
