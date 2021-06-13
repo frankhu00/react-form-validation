@@ -4,6 +4,7 @@ export enum ValidationRuleTypes {
     required = 'required',
     pattern = 'pattern',
     lengthRange = 'length-range',
+    uniqueValue = 'unique-value',
 }
 
 export type ValidatorFn = (inputValue: any) => boolean;
@@ -29,9 +30,25 @@ export interface PatternRuleOptions extends ValidationRuleOptions {
     inverse?: boolean;
 }
 
+export type ComparatorFn = (a: any, b: any) => boolean;
+
+export interface UniqueValueRuleOptions extends ValidationRuleOptions {
+    inverse?: boolean;
+    comparator?: ComparatorFn;
+    haystackTransformer?: (hay: any) => any;
+}
+
 export interface ValidationState {
     passed: boolean;
     messages: string[];
+}
+
+//For manually running the validate fn inside the useValidation hook
+export type ValidateFn = (value: any) => void;
+
+export interface UseValidationResponse {
+    validity: ValidationState;
+    validate: ValidateFn;
 }
 
 export type ValidationEventListener = (state: ValidationState, value: any, name?: string) => void;
@@ -46,7 +63,7 @@ export interface ValidationConfig {
 
 export interface ValidationInputProps {
     rules: ValidationRule[];
-    children: (validity: ValidationState) => React.ReactNode;
+    children: (validity: ValidationState, validate: ValidateFn) => React.ReactNode;
     InputComponent?: React.ElementType | React.FC<any>;
     validateOnMount?: boolean;
     onValidityChanged?: ValidationEventListener;

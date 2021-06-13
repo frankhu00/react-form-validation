@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { ValidationRule, ValidationState, ValidationConfig } from './types';
+import {
+    ValidationRule,
+    ValidationState,
+    ValidationConfig,
+    UseValidationResponse,
+    ValidateFn,
+} from './types';
 
 const executeValidators = (inputValue: any, rules: ValidationRule[]) => {
     const messages: string[] = [];
@@ -24,11 +30,20 @@ const defaultInitialValidity: ValidationState = {
     messages: [],
 };
 
+/**
+ * Core logic to parses the validation rules and validates the input value whenever it changes.
+ * Returns `{ validity: ValidationState, validate: ValidateFn }`. The `validate` fn is so you can manually trigger the validation logic
+ *
+ * @param inputValue Value of the input component
+ * @param rules Validation rules that applies
+ * @param config ValidationConfig
+ * @returns UseValidationResponse
+ */
 export const useValidation: (
     inputValue: any,
     rules: ValidationRule[],
     config: ValidationConfig
-) => ValidationState = (inputValue, rules, config) => {
+) => UseValidationResponse = (inputValue, rules, config) => {
     const {
         inputName,
         validateOnMount,
@@ -45,7 +60,7 @@ export const useValidation: (
     ]);
     const isOnMount = useRef<boolean>(true);
 
-    const updateValidationState = (value: any) =>
+    const updateValidationState: ValidateFn = (value: any) =>
         setValidity((prev) => {
             const state = executeValidators(value, rules);
             if (state.passed !== prev[0].passed && onValidityChanged) {
@@ -74,5 +89,8 @@ export const useValidation: (
         };
     }, [inputValue]);
 
-    return validity[0]; //1st element is the current state
+    return {
+        validity: validity[0],
+        validate: updateValidationState,
+    };
 };
