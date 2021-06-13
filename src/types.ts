@@ -69,7 +69,8 @@ export interface ValidationInputProps {
     onValidityChanged?: ValidationEventListener;
     onValiditySuccess?: ValidationEventListener;
     onValidityFailure?: ValidationEventListener;
-    bindEventListener?: string;
+    bindEventListener?: string[];
+    bindValidityToEvent?: string[];
     defaultValue?: any;
     inputValueParser?: (...args: [...any]) => any;
     Wrapper?: React.ElementType;

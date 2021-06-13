@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ValidationInputProps } from './types';
+import { UseValidationResponse, ValidationInputProps } from './types';
 import { useValidation } from './useValidation';
 
 const defaultProps: ValidationInputProps = {
@@ -7,7 +7,8 @@ const defaultProps: ValidationInputProps = {
     Wrapper: React.Fragment,
     InputComponent: 'input',
     type: 'text',
-    bindEventListener: 'onChange',
+    bindEventListener: ['onChange'],
+    bindValidityToEvent: [],
     children: () => null,
     defaultValue: undefined,
     validateOnMount: false,
@@ -26,7 +27,10 @@ const defaultProps: ValidationInputProps = {
  * - **Wrapper**: React.ElementType<any> - specifies wrapper component around the input component. Default: `React.Fragment`
  * - **inputValueParser**: function - function used to specify how to get the input value from the input component.
  *  Pulls from `event.currentTarget.value` if undefined. Default: `undefined`
- * - **bindEventListener**: string - specifies which event listener to bind to. Default: `"onChange"`
+ * - **bindEventListener**: string[] - specifies which event listener to bind the validation call to and also return the validation state as 2nd argument to event handler.
+ * Default: `["onChange"]`
+ * - **bindValidityToEvent**: string[] - specifies which event listener to attach the validation state to (2nd argument) ***WITHOUT*** calling the validation function.
+ * This has lower priority than `bindEventListener` if there is an overlap of events. Default: `[]`
  * - **validateOnMount**: boolean - validates the input on component mount when true. Default: `false`
  * - **onValidityChange**: (validity: ValidationState, inputValue: any, name?: string) => void - an event listener that triggers when validation state (`validity.passed`) changes
  * - **onValiditySuccess**: (validity: ValidationState, inputValue: any, name?: string) => void - an event listener that triggers when validation state (`validity.passed`) evaluates to true
@@ -48,6 +52,7 @@ const ValidateInput = ({
     InputComponent,
     inputValueParser,
     bindEventListener,
+    bindValidityToEvent,
     validateOnMount,
     onValidityChanged,
     onValiditySuccess,
@@ -64,7 +69,36 @@ const ValidateInput = ({
         onValidityFailure,
     });
 
-    const attachedEventListener = (event: React.ChangeEvent<any>, ...args) => {
+    /**
+     * Generates a map of event handlers that will call the validate fn and the original event handler and attaches validation state
+     * as the 2nd argument
+     */
+    const generateValidationEvent = () => {
+        const validateOnEvent = {};
+        bindEventListener.forEach((event: string) => {
+            validateOnEvent[event] = attachedEventListener(event);
+        });
+        return validateOnEvent;
+    };
+
+    /**
+     * Generates a map of event handlers that will attach the validation state (validity) to original event handler as 2nd argument
+     */
+    const generateAppendValidityEvent = () => {
+        const validityForEvent = {};
+        bindValidityToEvent.forEach((event: string) => {
+            validityForEvent[event] = callOriginalEventHandlers(event);
+        });
+        return validityForEvent;
+    };
+
+    /**
+     * Used to bind an event handler to call the validation logic in addition to its original functionality
+     */
+    const attachedEventListener = (bindEvent: string) => (
+        event: React.ChangeEvent<any>,
+        ...args
+    ) => {
         if (inputValueParser) {
             setInputValue(inputValueParser(event, ...args));
         } else if (typeof event.currentTarget?.value !== 'undefined') {
@@ -73,15 +107,27 @@ const ValidateInput = ({
             console.log('Can not find input value to validate against');
         }
 
-        if (typeof props[bindEventListener] === 'function') {
-            props[bindEventListener](event);
+        callOriginalEventHandlers(bindEvent)(event, ...args);
+    };
+
+    /**
+     * Calls the original event handler but attaches UseValidationResponse to the 2nd argument
+     */
+    const callOriginalEventHandlers = (eventName: string) => (
+        event: React.ChangeEvent<any>,
+        ...args: [...any]
+    ) => {
+        if (typeof props[eventName] === 'function') {
+            const ValidationResponse: UseValidationResponse = { validity, validate };
+            props[eventName](event, ValidationResponse, ...args);
         }
     };
 
     const componentProps: { [key: string]: any } = {
         ...props,
         defaultValue,
-        [bindEventListener]: attachedEventListener,
+        ...generateAppendValidityEvent(), //this first same events are overriden by generateValidationEvent
+        ...generateValidationEvent(),
     };
 
     const renderInputComponent = () => {

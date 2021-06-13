@@ -112,6 +112,20 @@ const Demo = () => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setText(e.currentTarget.value)
                 }
+                onBlur={(e, v, ...args) => {
+                    console.log('blah', {
+                        e,
+                        v,
+                        r: args,
+                    });
+                }}
+                bindEventListener={['onBlur', 'onChange']}
+                bindValidityToEvent={['onKeyDown']}
+                onKeyDown={(e, v) => {
+                    //this does not run validate fn as its binded using bindValidityToEvent
+                    //this just has validity info (but may not be correct since validate isn't called)
+                    console.log(v);
+                }}
                 onValidityChanged={(state, _, name) => {
                     console.log(name, { state });
                 }}

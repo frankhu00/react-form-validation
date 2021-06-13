@@ -26,6 +26,6 @@ Input must match regex pattern
 
 Input length must be within the specified range
 
-### UniqueRule
+### UniqueValueRule
 
 Input must be unique within an array of existing values
