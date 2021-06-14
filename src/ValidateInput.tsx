@@ -105,9 +105,9 @@ const ValidateInput = ({
             setInputValue(event.currentTarget.value);
         } else {
             console.log(
-                'Can not find input value to validate against. Using fallback method. Consider defining "inputValueParser" to manually define input value'
+                'Can not find input value to validate against. Using fallback method. Consider using "inputValueParser" to manually define how to parse input value.'
             );
-            setInputValue(args);
+            setInputValue([event, ...args]);
         }
 
         callOriginalEventHandlers(bindEvent)(event, ...args);
