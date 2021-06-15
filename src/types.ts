@@ -5,6 +5,7 @@ export enum ValidationRuleTypes {
     pattern = 'pattern',
     lengthRange = 'length-range',
     uniqueValue = 'unique-value',
+    custom = 'custom',
 }
 
 export type ValidatorFn = (inputValue: any) => boolean;
@@ -36,6 +37,11 @@ export interface UniqueValueRuleOptions extends ValidationRuleOptions {
     inverse?: boolean;
     comparator?: ComparatorFn;
     haystackTransformer?: (hay: any) => any;
+}
+
+export interface CustomRuleOptions {
+    message?: string;
+    transformer?: (inputValue: any) => any;
 }
 
 export interface ValidationState {

@@ -29,3 +29,7 @@ Input length must be within the specified range
 ### UniqueValueRule
 
 Input must be unique within an array of existing values
+
+### CustomRule
+
+Must provide a validator function

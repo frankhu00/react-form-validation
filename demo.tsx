@@ -113,7 +113,7 @@ const Demo = () => {
                     setText(e.currentTarget.value)
                 }
                 onBlur={(e, v, ...args) => {
-                    console.log('blah', {
+                    console.log('onBlur', {
                         e,
                         v,
                         r: args,

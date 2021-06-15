@@ -7,6 +7,7 @@ import {
     PatternRuleOptions,
     UniqueValueRuleOptions,
     ComparatorFn,
+    CustomRuleOptions,
 } from './types';
 
 /**
@@ -166,3 +167,25 @@ export const UniqueValueRule: (
         validator: verify,
     };
 };
+
+/**
+ * Custom rule. Must provide the validator function.
+ * @param validator ValidatorFn - ***Required method***. Called when validation logic is triggered
+ * @param options CustomRuleOptions:
+ * - **message**: string - Error message
+ * - **transformer**: (value: any) => any - Used to transform the input value before getting passed to validation fn
+ *
+ * @returns ValidationRule
+ */
+export const CustomRule: (validator: ValidatorFn, options?: CustomRuleOptions) => ValidationRule = (
+    validator,
+    { message, transformer } = {}
+) => ({
+    type: ValidationRuleTypes.custom,
+    value: null,
+    message: message ?? 'Validation: CustomRule failed',
+    validator: (inputValue: any) => {
+        const value = transformer ? transformer(inputValue) : inputValue;
+        return validator(value);
+    },
+});
